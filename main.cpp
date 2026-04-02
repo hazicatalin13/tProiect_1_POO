@@ -5,3 +5,5 @@ int main() {
     workshop.ruleaza();
     return 0;
 }
+
+
