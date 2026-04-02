@@ -4,6 +4,7 @@ int Amintire::generatorID = 100;
 
 Amintire::Amintire(std::string desc, float dist) : id(generatorID++), descriere(desc), procentDistrugere(dist) {}
 
+
 void Amintire::afiseazaSimplu() const {
     std::cout << descriere << " (" << (int)(procentDistrugere * 100) << "% distrugere)\n";
 }
