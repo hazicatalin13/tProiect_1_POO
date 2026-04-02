@@ -7,6 +7,7 @@
 #include <random>
 #include <ctime>
 
+
 //exceptii
 
 class JocException : public std::exception {
