@@ -1,6 +1,7 @@
-#include<iostream>
+#include "memorie.h"
 
-int main(){
-    std::cout<<"Hello world!";
+int main() {
+    MeniuInteractiv workshop;
+    workshop.ruleaza();
     return 0;
 }
