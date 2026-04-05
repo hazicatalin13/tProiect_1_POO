@@ -1,11 +1,16 @@
 #include "memorie.h"
 #include<iostream>
+#include<algorithm>
 
 int Amintire::generatorID = 100;
 Amintire::Amintire(std::string desc, int dist) : id(generatorID++), descriere(desc), distrugere(dist) {}
 
-ArhivaManager::~ArhivaManager() { for(auto a : colectie) delete a; }
-
+ArhivaManager::~ArhivaManager() { 
+    for(auto a : colectie) {
+        delete a; 
+    }
+    colectie.clear(); 
+}
 void ArhivaManager::afisareBazaDate() {
     std::cout << "\n--- LISTA COMPLETA (ADMIN) ---";
     for(auto a : colectie) { std::cout << "\n[" << a->getID() << "] "; a->afiseaza(); }
