@@ -4,152 +4,134 @@
 #include <string>
 #include <exception>
 #include <algorithm>
-#include <random>
-#include <ctime>
-
-
-//exceptii
 
 class JocException : public std::exception {
-protected: std::string mesaj;
-public: 
+protected:
+    std::string mesaj;
+public:
     JocException(std::string m) : mesaj(m) {}
     const char* what() const noexcept override { return mesaj.c_str(); }
 };
 
-class SanityDepletedException : public JocException { 
-public: SanityDepletedException() : JocException("GAME OVER: Sanity 0!") {} 
+class SanityDepletedException : public JocException {
+public: SanityDepletedException() : JocException("GAME OVER: Sanity s-a epuizat!") {}
 };
 
-class ResurseInsuficienteException : public JocException { 
-public: ResurseInsuficienteException(std::string r) : JocException("Eroare: Nu mai ai destul(a) " + r + " pentru aceasta reparatie!") {} 
+class ResurseInsuficienteException : public JocException {
+public: ResurseInsuficienteException(std::string r) : JocException("Resurse insuficiente: " + r) {}
 };
 
-class IDInvalidException : public JocException { 
-public: IDInvalidException() : JocException("Eroare: ID invalid!") {} 
+class AccesInterzisException : public JocException {
+public: AccesInterzisException() : JocException("Acces interzis: Doar Admin!") {}
 };
 
+class IDInvalidException : public JocException {
+public: IDInvalidException() : JocException("ID invalid!") {}
+};
 
+class User {
+protected:
+    std::string username;
+public:
+    User(std::string nume) : username(nume) {}
+    virtual ~User() {}
+    virtual bool poateModifica() const = 0; 
+    std::string getUsername() const { return username; }
+};
+
+class Player : public User {
+public:
+    Player(std::string nume) : User(nume) {}
+    bool poateModifica() const override { return false; }
+};
+
+class Admin : public User {
+public:
+    Admin(std::string nume) : User(nume) {}
+    bool poateModifica() const override { return true; }
+};
 
 class Amintire {
 protected:
-    int id; 
-    std::string descriere; 
-    float procentDistrugere; 
+    int id;
+    std::string descriere;
+    int distrugere; 
+    bool procesatInSesiune = false; 
     static int generatorID;
 public:
-    Amintire(std::string desc, float dist);
-    virtual ~Amintire() {} 
-    virtual void afiseaza() const = 0; 
-    virtual void afiseazaSimplu() const; 
-    virtual Amintire* clone() const = 0; 
-    virtual std::string getTip() const = 0;
-    
+    Amintire(std::string desc, int dist);
+    virtual ~Amintire() {}
+    virtual void afiseaza() const = 0;
     int getID() const { return id; }
-    void setDescriere(std::string d) { descriere = d; }
-    void setDistrugere(float d) { procentDistrugere = d; }
-    float getProcentDistrugere() const { return procentDistrugere; }
+    int getDist() const { return distrugere; }
+    void setDist(int d) { distrugere = d; }
+    void setDesc(std::string d) { descriere = d; }
+    bool esteProcesat() const { return procesatInSesiune; }
+    void setProcesat(bool v) { procesatInSesiune = v; }
 };
-
 
 class AmintireRestaurabila : virtual public Amintire {
 public:
-    AmintireRestaurabila(std::string d, float dist) : Amintire(d, dist) {}
-    virtual std::string getMaterialNecesar() const = 0;
+    AmintireRestaurabila(std::string d, int dist) : Amintire(d, dist) {}
+    virtual std::string getMaterial() const = 0;
 };
-
 
 class ObiectFragil : virtual public AmintireRestaurabila {
-protected: float factorPedeapsa; 
 public:
-    ObiectFragil(std::string d, float dist, float risc);
-    void afiseaza() const override;
-    Amintire* clone() const override;
-    std::string getTip() const override { return "FRAGIL"; }
-    std::string getMaterialNecesar() const override { return "lipici"; }
-    float getPedeapsa() const { return factorPedeapsa; }
+    ObiectFragil(std::string d, int dist) : Amintire(d, dist), AmintireRestaurabila(d, dist) {}
+    void afiseaza() const override { std::cout << descriere << " (" << distrugere << "% distrugere)"; }
+    std::string getMaterial() const override { return "lipici"; }
 };
-
 
 class ObiectPretios : virtual public AmintireRestaurabila {
-protected: int bonusSanity;
 public:
-    ObiectPretios(std::string d, float dist, int bonus);
-    void afiseaza() const override;
-    Amintire* clone() const override;
-    std::string getTip() const override { return "PRETIOS"; }
-    std::string getMaterialNecesar() const override { return "ac"; }
-    int getBonus() const { return bonusSanity; }
+    ObiectPretios(std::string d, int dist) : Amintire(d, dist), AmintireRestaurabila(d, dist) {}
+    void afiseaza() const override { std::cout << descriere << " (" << distrugere << "% distrugere)"; }
+    std::string getMaterial() const override { return "ac"; }
 };
-
-//diamant
 
 class ArtefactLegendar : public ObiectFragil, public ObiectPretios {
 public:
-    ArtefactLegendar(std::string d, float dist, float risc, int bonus);
-    void afiseaza() const override;
-    Amintire* clone() const override;
-    std::string getTip() const override { return "LEGENDAR"; }
-    std::string getMaterialNecesar() const override { return "lipici"; }
+    ArtefactLegendar(std::string d, int dist) : Amintire(d, dist), AmintireRestaurabila(d, dist), ObiectFragil(d, dist), ObiectPretios(d, dist) {}
+    void afiseaza() const override { std::cout << descriere << " (" << distrugere << "% distrugere)"; }
+    std::string getMaterial() const override { return "lipici"; }
 };
 
 class ObiectTextil : public AmintireRestaurabila {
 public:
-    ObiectTextil(std::string d, float dist) : Amintire(d, dist), AmintireRestaurabila(d, dist) {}
-    void afiseaza() const override;
-    Amintire* clone() const override { return new ObiectTextil(*this); }
-    std::string getTip() const override { return "TEXTIL"; }
-    std::string getMaterialNecesar() const override { return "ac"; }
+    ObiectTextil(std::string d, int dist) : Amintire(d, dist), AmintireRestaurabila(d, dist) {}
+    void afiseaza() const override { std::cout << descriere << " (" << distrugere << "% distrugere)"; }
+    std::string getMaterial() const override { return "ac"; }
 };
 
 class ObiectHartie : public AmintireRestaurabila {
 public:
-    ObiectHartie(std::string d, float dist) : Amintire(d, dist), AmintireRestaurabila(d, dist) {}
-    void afiseaza() const override;
-    Amintire* clone() const override { return new ObiectHartie(*this); }
-    std::string getTip() const override { return "HARTIE"; }
-    std::string getMaterialNecesar() const override { return "scoci"; }
+    ObiectHartie(std::string d, int dist) : Amintire(d, dist), AmintireRestaurabila(d, dist) {}
+    void afiseaza() const override { std::cout << descriere << " (" << distrugere << "% distrugere)"; }
+    std::string getMaterial() const override { return "scoci"; }
 };
-
-class ObiectSolid : public AmintireRestaurabila {
-public:
-    ObiectSolid(std::string d, float dist) : Amintire(d, dist), AmintireRestaurabila(d, dist) {}
-    void afiseaza() const override;
-    Amintire* clone() const override { return new ObiectSolid(*this); }
-    std::string getTip() const override { return "SOLID"; }
-    std::string getMaterialNecesar() const override { return "lipici"; }
-};
-
-class TrusaMesterului {
-    float rAc, rScoci, rLipici;
-public:
-    TrusaMesterului();
-    void reset();
-    void foloseste(std::string tip, float cantitateProcent);
-    void afisareResurse() const;
-};
-
-
 
 class ArhivaManager {
     std::vector<Amintire*> colectie;
-    int sanity, ziua;
-    TrusaMesterului trusa;
+    int sanity = 250, ziua = 1;
+    int rAc = 100, rScoci = 100, rLipici = 100;
 public:
     ArhivaManager();
     ~ArhivaManager();
-    void adauga(Amintire* a);
+    void adauga(Amintire* a) { colectie.push_back(a); }
     void afisareBazaDate();
-    void creareObiect();
-    void modificareObiect();
-    void stergereObiect();
+    void adaugareAdmin();
+    void modificareAdmin();
+    void stergereAdmin();
     void joacaZiua();
-    int getSanity() const { return sanity; }
 };
-
 
 class MeniuInteractiv {
     ArhivaManager manager;
+    User* utilizatorCurent;
 public:
+    MeniuInteractiv() : utilizatorCurent(nullptr) {}
+    ~MeniuInteractiv() { delete utilizatorCurent; }
+    void login();
     void ruleaza();
 };
