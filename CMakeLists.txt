@@ -18,6 +18,7 @@ endif()
 # Main executable
 add_executable(${PROJECT_NAME} main.cpp arhivaMemorie.cpp obiecte.cpp)
 
+
 if(GITHUB_ACTIONS)
     message("NOTE: GITHUB_ACTIONS defined")
     target_compile_definitions(${PROJECT_NAME} PRIVATE GITHUB_ACTIONS)
