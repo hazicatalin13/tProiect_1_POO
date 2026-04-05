@@ -118,6 +118,8 @@ class ArhivaManager {
 public:
     ArhivaManager();
     ~ArhivaManager();
+    ArhivaManager(const ArhivaManager&) = delete;          //regula celor 3
+    ArhivaManager& operator=(const ArhivaManager&) = delete;
     void adauga(Amintire* a) { colectie.push_back(a); }
     void afisareBazaDate();
     void adaugareAdmin();
