@@ -1,5 +1,5 @@
 #include "memorie.h"
-#include<iostream>
+#include <iostream>
 
 int main() {
     MeniuInteractiv workshop;
