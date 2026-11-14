@@ -1,7 +1,8 @@
 1. Descrierea Proiectului
+   
 Acest proiect este o aplicație de tip joc de gestiune și restaurare.  Utilizatorul preia rolul unui restaurator care trebuie să salveze obiecte vechi (amintiri) folosind un set limitat de resurse și gestionându-și starea mentală (Sanity). Aplicația include un sistem de progresie pe zile și o bază de date interactivă pentru obiecte.
 
-2. Structura Claselor
+3. Structura Claselor
 -Clase Core (Nucleu)
 Amintire (Abstractă): Definește obiectul de bază, stochează ID-ul unic (generat static), descrierea și gradul de distrugere.
 
